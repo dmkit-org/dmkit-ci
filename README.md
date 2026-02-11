@@ -66,6 +66,71 @@ jobs:
       token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
+### Backend CI
+
+Builds, tests, and deploys the Go backend. Runs `make test` and `make lint` on every PR. On push to `main`, also builds the Docker image, pushes to ECR, and updates the ECS service.
+
+**Inputs:** `aws-region`, `ecr-repository`, `ecs-cluster`, `ecs-service`, `role-to-assume`, `deploy`
+
+**OIDC prerequisite:** IAM role ARN from `terraform output github_actions_backend_role_arn`
+
+**Usage:**
+
+```yaml
+jobs:
+  ci:
+    uses: dmkit-org/dmkit-ci/.github/workflows/backend-ci.yml@main
+    with:
+      aws-region: us-east-1
+      ecr-repository: dmkit-backend
+      ecs-cluster: dmkit-dev
+      ecs-service: dmkit-backend
+      role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+      deploy: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+```
+
+### Frontend CI
+
+Builds, lints, and deploys the Next.js frontend. Runs `npm run lint` and `npm run build` on every PR. On push to `main`, also syncs static assets to S3 and invalidates the CloudFront cache.
+
+**Inputs:** `aws-region`, `s3-bucket`, `cloudfront-distribution-id`, `role-to-assume`, `deploy`
+
+**OIDC prerequisite:** IAM role ARN from `terraform output github_actions_frontend_role_arn`
+
+**Usage:**
+
+```yaml
+jobs:
+  ci:
+    uses: dmkit-org/dmkit-ci/.github/workflows/frontend-ci.yml@main
+    with:
+      aws-region: us-east-1
+      s3-bucket: ${{ vars.S3_BUCKET }}
+      cloudfront-distribution-id: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}
+      role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+      deploy: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+```
+
+### Infra CI
+
+Runs Terraform plan on every PR. On push to `main`, also runs Terraform apply.
+
+**Inputs:** `aws-region`, `working-directory` (default: `envs/dev/`), `role-to-assume`, `apply`
+
+**OIDC prerequisite:** IAM role ARN from `terraform output github_actions_infra_role_arn`
+
+**Usage:**
+
+```yaml
+jobs:
+  ci:
+    uses: dmkit-org/dmkit-ci/.github/workflows/infra-ci.yml@main
+    with:
+      aws-region: us-east-1
+      role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+      apply: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+```
+
 ## Advisory Linting
 
 Both linting workflows use `continue-on-error: true`. Results are reported but never block the calling workflow.
