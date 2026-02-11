@@ -1,0 +1,47 @@
+name: Commitlint
+
+on:
+  workflow_call:
+
+jobs:
+  commitlint:
+    name: Lint commits
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout calling repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Checkout dmkit-ci for config
+        uses: actions/checkout@v4
+        with:
+          repository: dmkit-org/dmkit-ci
+          path: .dmkit-ci
+
+      - name: Install commitlint
+        run: cd .dmkit-ci && npm ci
+
+      - name: Lint PR title
+        if: github.event_name == 'pull_request'
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: echo "$PR_TITLE" | npx --prefix .dmkit-ci commitlint --config .dmkit-ci/commitlint.config.js
+
+      - name: Lint commits
+        if: github.event_name == 'pull_request'
+        run: |
+          npx --prefix .dmkit-ci commitlint \
+            --config .dmkit-ci/commitlint.config.js \
+            --from ${{ github.event.pull_request.base.sha }} \
+            --to ${{ github.event.pull_request.head.sha }}
+
+      - name: Cleanup
+        if: always()
+        run: rm -rf .dmkit-ci

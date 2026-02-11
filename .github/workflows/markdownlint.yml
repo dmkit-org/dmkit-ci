@@ -1,0 +1,34 @@
+name: Markdownlint
+
+on:
+  workflow_call:
+
+jobs:
+  markdownlint:
+    name: Lint markdown
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout calling repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Checkout dmkit-ci for dependencies
+        uses: actions/checkout@v4
+        with:
+          repository: dmkit-org/dmkit-ci
+          path: .dmkit-ci
+
+      - name: Install markdownlint
+        run: cd .dmkit-ci && npm ci
+
+      - name: Lint markdown files
+        run: npx --prefix .dmkit-ci markdownlint-cli2 "**/*.md" "#node_modules" "#.dmkit-ci"
+
+      - name: Cleanup
+        if: always()
+        run: rm -rf .dmkit-ci

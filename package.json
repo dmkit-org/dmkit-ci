@@ -1,0 +1,11 @@
+{
+  "name": "dmkit-ci",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Shared CI/CD workflows and configuration for DMKit repositories",
+  "dependencies": {
+    "@commitlint/cli": "^19.0.0",
+    "@commitlint/config-conventional": "^19.0.0",
+    "markdownlint-cli2": "^0.17.0"
+  }
+}
