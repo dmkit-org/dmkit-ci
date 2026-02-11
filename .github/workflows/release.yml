@@ -1,0 +1,46 @@
+name: Release
+
+on:
+  workflow_call:
+    secrets:
+      token:
+        description: "GitHub token with contents:write permission"
+        required: true
+
+jobs:
+  release:
+    name: Semantic release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Checkout calling repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.token }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Checkout dmkit-ci for config
+        uses: actions/checkout@v4
+        with:
+          repository: dmkit-org/dmkit-ci
+          path: .dmkit-ci
+
+      - name: Install semantic-release
+        run: cd .dmkit-ci && npm ci
+
+      - name: Run semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.token }}
+        run: npx --prefix .dmkit-ci semantic-release --extends ./.dmkit-ci/.releaserc.json
+
+      - name: Cleanup
+        if: always()
+        run: rm -rf .dmkit-ci
