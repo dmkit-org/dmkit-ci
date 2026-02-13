@@ -44,6 +44,9 @@ jobs:
           role-to-assume: ${{ inputs.role-to-assume }}
           aws-region: ${{ inputs.aws-region }}
 
+      - name: Lint
+        run: make lint
+
       - name: Terraform init
         working-directory: ${{ inputs.working-directory }}
         run: terraform init

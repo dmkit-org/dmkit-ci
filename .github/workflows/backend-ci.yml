@@ -46,7 +46,7 @@ jobs:
         run: make test
 
       - name: Run linter
-        uses: golangci/golangci-lint-action@v6
+        run: make lint
 
       - name: Build binary
         run: make build

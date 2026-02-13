@@ -43,10 +43,10 @@ jobs:
         run: npm ci
 
       - name: Lint
-        run: npm run lint
+        run: make lint
 
       - name: Build
-        run: npm run build
+        run: make build
 
       - name: Upload build artifact
         if: ${{ inputs.deploy }}
