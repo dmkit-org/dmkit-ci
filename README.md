@@ -1,6 +1,33 @@
 # DMKit CI
 
-Shared CI/CD workflows and configuration for DMKit repositories.
+Shared CI/CD workflows, git hooks, and configuration for DMKit repositories.
+
+## Git Hooks
+
+### Commit Message Hook
+
+Enforces [Conventional Commits](https://www.conventionalcommits.org/) format for all commit messages.
+
+**Allowed types:** `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `ci`
+
+**Installation:**
+
+Add to your repository's `Makefile`:
+
+```makefile
+setup:
+	@printf '#!/bin/sh\nmake lint\n' > .git/hooks/pre-commit
+	@chmod +x .git/hooks/pre-commit
+	@curl -fsSL https://raw.githubusercontent.com/dmkit-org/dmkit-ci/main/hooks/commit-msg -o .git/hooks/commit-msg
+	@chmod +x .git/hooks/commit-msg
+	@echo "Git hooks installed."
+```
+
+Then run:
+
+```bash
+make setup
+```
 
 ## Available Workflows
 
